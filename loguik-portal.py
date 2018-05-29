@@ -42,12 +42,12 @@ def set_firewall(list, remote_IP):
 	logging.info('Updating address-list on router {}'.format(router))
 	client.connect(hostname=router, port=cfg.MK_PORT, username=cfg.MK_USER, pkey=KEY)
 	stdin,stdout,stderr = client.exec_command(command)
-	output = stdout.read()
+	output = stdout.read().rstrip()
 	logging.info('Return for {} : {}'.format(router, output))
 
 	if re.search('failure', output):
 	    if re.search('already', output):
-	        message = "You are already authorized with address {} ({})".format(list, remote_IP, output)
+	        message = "You are already authorized in list \"{}\" with address {} ({})".format(list, remote_IP, output)
 	    else:
 		message = "Error while processing request ({})".format(output)
 
