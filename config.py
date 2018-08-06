@@ -2,11 +2,11 @@
 
 ###
 # These variables are used as settings
-HOSTNAME:   "loguik.domain.tld"   # ip address of the loguik portal web server (public address needed if it runs on public network)
-PORT:       9090                  # port in which the loguik portal web server listens
+HOSTNAME:   "heimdallr.domain.tld"   # ip address of the heimdallr portal web server (public address needed if it runs on public network)
+PORT:       9090                  # port in which the heimdallr portal web server listens
 REPLY_PORT: 9090                  # port on which the reply will be done (usefull in case of reverse proxifying)
-KEY_SSL:    "/etc/letsencrypt/live/loguik.domain.tld/privkey.pem"    # path to ssl key to provide client to server security
-CERT_SSL:   "/etc/letsencrypt/live/loguik.domain.tld/fullchain.pem"  # path to ssl certificate
+KEY_SSL:    "/etc/letsencrypt/live/heimdallr.domain.tld/privkey.pem"    # path to ssl key to provide client to server security
+CERT_SSL:   "/etc/letsencrypt/live/heimdallr.domain.tld/fullchain.pem"  # path to ssl certificate
 #
 # max attempts on wrong login or password
 MAX_RETRY:  3

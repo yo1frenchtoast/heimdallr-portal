@@ -10,14 +10,14 @@ from config import Config
 import logging
 
 ###
-## Loguik : Mikrotik whitelisting portal
+## HEIMDALLR : RouterOS whitelisting portal
 ## - ytanguy, 2017-12-06
 ##
 ## inspired by https://github.com/nikosft/login-portal
 ###
 
 # import configuration
-file = file('/etc/loguik-portal/config.py')
+file = file('/etc/heimdallr-portal/config.py')
 cfg = Config(file)
 
 # scoring for blacklisting
@@ -29,9 +29,9 @@ def check_password(stored_password, user_password):
     return hashed_password == hashlib.sha256(stored_salt + user_password).hexdigest()
 
 def set_firewall(list, remote_IP):
-    firewall = '/ip firewall address-list add list='+ list +' timeout=2h comment="added by loguik-portal.py" address='+ remote_IP +';'
-    log = '/log warning "loguik-portal.py : added '+ remote_IP +' to '+ list +' address-list for 2 hours";'
-    email = '/tool e-mail send to='+ cfg.MK_EMAIL +' subject="$[/system identity get name] loguik-portal.py : added '+ remote_IP +' to '+ list +' address-list for 2 hours";'
+    firewall = '/ip firewall address-list add list='+ list +' timeout=2h comment="added by heimdallr-portal.py" address='+ remote_IP +';'
+    log = '/log warning "heimdallr-portal.py : added '+ remote_IP +' to '+ list +' address-list for 2 hours";'
+    email = '/tool e-mail send to='+ cfg.MK_EMAIL +' subject="$[/system identity get name] heimdallr-portal.py : added '+ remote_IP +' to '+ list +' address-list for 2 hours";'
     command = firewall + log + email
 
     #default message is success

@@ -1,0 +1,9 @@
+[Unit]
+Description=Heimdallr Portal for RouterOS
+
+[Service]
+Type=simple
+ExecStart=/opt/heimdallr-portal/heimdallr-portal.py
+
+[Install]
+WantedBy=multi-user.target

@@ -1,9 +1,0 @@
-[Unit]
-Description=Loguik Portal for Mikrotik
-
-[Service]
-Type=simple
-ExecStart=/usr/bin/loguik-portal.py
-
-[Install]
-WantedBy=multi-user.target

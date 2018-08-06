@@ -1,4 +1,4 @@
-# Loguik portal : self-hosted whitelist portal for Mikrotik
+# HEIMDALLR : self-hosted whitelist portal for RouterOS
 Use a login page to allow your ip address to connect to your infrastucture
 
 ## TODO
@@ -18,29 +18,30 @@ Install paramiko and config Python library
 pip install paramiko
 pip install config
 ```
-Move binary to /usr/bin/
+Clone repo
 ```
-cp mikrotik-loguik-portal/loguik-portal.py /usr/bin/
+git clone
+cp -r heimdallr-portal/ /opt/
 ```
 Add execution rights
 ``` 
-chmod a+x /usr/bin/loguik-portal.py
+chmod a+x /opt/heimdallr-portal/heimdallr-portal.py
 ```
 Configure settings
 ```
-mkdir /etc/loguik-portal/
-cp -r mikrotik-loguik-portal/etc/loguik-portal/ /etc/loguik-portal/
-vi /etc/loguik-portal/config.py
+mkdir /etc/heimdallr-portal/
+cp -r heimdallr-portal/etc/heimdallr-portal/ /etc/heimdallr-portal/
+vi /etc/heimdallr-portal/config.py
 
 #!/usr/bin/python
 
 ###
 # These variables are used as settings
-HOSTNAME:   "loguik.domain.tld"   # ip address of the loguik portal web server (public address needed if it runs on public network)
-PORT:       9090                  # port in which the loguik portal web server listens
+HOSTNAME:   "heimdallr.domain.tld"   # ip address of the heimdallr portal web server (public address needed if it runs on public network)
+PORT:       9090                  # port in which the heimdallr portal web server listens
 REPLY_PORT: 9090                  # port on which the reply will be done (usefull in case of reverse proxifying)
-KEY_SSL:    "/etc/letsencrypt/live/loguik.domain.tld/privkey.pem"    # path to ssl key to provide client to server security
-CERT_SSL:   "/etc/letsencrypt/live/loguik.domain.tld/fullchain.pem"  # path to ssl certificate
+KEY_SSL:    "/etc/letsencrypt/live/heimdallr.domain.tld/privkey.pem"    # path to ssl key to provide client to server security
+CERT_SSL:   "/etc/letsencrypt/live/heimdallr.domain.tld/fullchain.pem"  # path to ssl certificate
 #
 # max attempts on wrong login or password
 MAX_RETRY:  3
@@ -61,8 +62,8 @@ LOGINS: {
 ```
 Optional : create systemd service
 ```
-cp -r mikrotik-loguik-portal/loguik-portal.service /lib/systemd/system/
+cp -r heimdallr-portal/heimdallr-portal.service /lib/systemd/system/
 systemctl daemon-reload
-systemctl enable loguik-portal.service 
-service loguik-portal start
+systemctl enable heimdallr-portal.service 
+service heimdallr-portal start
 ```
