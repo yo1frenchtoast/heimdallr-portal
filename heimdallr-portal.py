@@ -31,16 +31,16 @@ def check_password(stored_password, user_password):
 def set_firewall(list, remote_IP):
     firewall = '/ip firewall address-list add list='+ list +' timeout=2h comment="added by heimdallr-portal.py" address='+ remote_IP +';'
     log = '/log warning "heimdallr-portal.py : added '+ remote_IP +' to '+ list +' address-list for 2 hours";'
-    email = '/tool e-mail send to='+ config['ROUTERS']['Admin_email'] +' subject="$[/system identity get name] heimdallr-portal.py : added '+ remote_IP +' to '+ list +' address-list for 2 hours";'
+    email = '/tool e-mail send to='+ config['ROUTERS']['admin_email'] +' subject="$[/system identity get name] heimdallr-portal.py : added '+ remote_IP +' to '+ list +' address-list for 2 hours";'
     command = firewall + log + email
 
     #default message is success
     message = "You are now authorized with address {}".format(remote_IP)
 
     output = {}
-    for router in config['ROUTERS']['List']:
+    for router in config['ROUTERS']['list']:
 	logging.info('Updating address-list on router {}'.format(router))
-	client.connect(hostname=router, port=int(config['ROUTERS']['Ssh_port']), username=config['ROUTERS']['Ssh_user'], pkey=KEY)
+	client.connect(hostname=router, port=int(config['ROUTERS']['ssh_port']), username=config['ROUTERS']['ssh_user'], pkey=KEY)
 	stdin,stdout,stderr = client.exec_command(command)
 	output = stdout.read().rstrip()
 	logging.info('Return for {} : {}'.format(router, output))
@@ -68,7 +68,7 @@ class CaptivePortal(BaseHTTPServer.BaseHTTPRequestHandler):
         <b>Redirecting to login page</b>
     </body>
     </html>
-    """%(config['SERVER']['Hostname'], config['SERVER']['Reply_port'])
+    """%(config['SERVER']['hostname'], config['SERVER']['reply_port'])
     #the login page
     html_login = """
     <html>
@@ -125,7 +125,7 @@ class CaptivePortal(BaseHTTPServer.BaseHTTPRequestHandler):
         remote_IP = self.client_address[0]
 
         #dummy security check
-        if username in config['USERS']['Logins'] and check_password(config['USERS']['Logins'][username], password):
+        if username in config['USERS']['list'] and check_password(config['USERS']['list'][username], password):
             #authorized user
             logging.info('New authorization from {} for user {}'.format(remote_IP, username))
             message = set_firewall('allowed', remote_IP)
@@ -140,8 +140,8 @@ class CaptivePortal(BaseHTTPServer.BaseHTTPRequestHandler):
                 scoring.update({remote_IP: 1})
             logging.warning('Current scoring for {} = {}'.format(remote_IP, scoring[remote_IP]))
 
-            if scoring[remote_IP] > config['SECURITY']['Max_retry']:
-                logging.warning('Attempt limit by address exceeded {} for {} : blacklisting'.format(config['SECURITY']['Max_retry'], remote_IP))
+            if scoring[remote_IP] > config['SECURITY']['max_retry']:
+                logging.warning('Attempt limit by address exceeded {} for {} : blacklisting'.format(config['SECURITY']['max_retry'], remote_IP))
 
                 set_firewall('blacklisted', remote_IP)
                 del scoring[remote_IP]
@@ -157,14 +157,14 @@ class CaptivePortal(BaseHTTPServer.BaseHTTPRequestHandler):
 if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%d-%d %H:%M:%S', level=logging.INFO)
 
-    logging.info('Starting web server on {}:{}'.format(config['SERVER']['Hostname'], config['SERVER']['Port']))
+    logging.info('Starting web server on {}:{}'.format(config['SERVER']['hostname'], config['SERVER']['port']))
     httpd = BaseHTTPServer.HTTPServer(('', int(config['SERVER']['Port'])), CaptivePortal)
 
     logging.info('Activating ssl')
-    httpd.socket = ssl.wrap_socket(httpd.socket, keyfile=config['SERVER']['Ssl_key'], certfile=config['SERVER']['Ssl_cert'], server_side=True)
+    httpd.socket = ssl.wrap_socket(httpd.socket, keyfile=config['SERVER']['ssl_key'], certfile=config['SERVER']['ssl_cert'], server_side=True)
 
-    logging.info('Initializing connection to router '+ ';'.join(config['ROUTERS']['List']))
-    KEY = paramiko.RSAKey.from_private_key_file(config['ROUTERS']['Ssh_key'])
+    logging.info('Initializing connection to router '+ ';'.join(config['ROUTERS']['list']))
+    KEY = paramiko.RSAKey.from_private_key_file(config['ROUTERS']['ssh_key'])
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
