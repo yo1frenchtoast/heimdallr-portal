@@ -6,7 +6,7 @@ Use a login page to allow your ip address to connect to your infrastucture
 
 ## Getting started
 
-### Preriquiries
+### Requirements
 * mikrotik router with configured ssh access
 * python with pip installed (prefered)
 * ssl certificate and key files
@@ -33,7 +33,15 @@ mkdir /etc/heimdallr-portal/
 cp -r heimdallr-portal/etc/heimdallr-portal/ /etc/heimdallr-portal/
 vi /etc/heimdallr-portal/config.py
 ```
-Configuration explanations
+Optional : create systemd service
+```
+cp -r heimdallr-portal/heimdallr-portal.service /lib/systemd/system/
+systemctl daemon-reload
+systemctl enable heimdallr-portal.service 
+service heimdallr-portal start
+```
+
+### Configuration explanations
 ```
 [SERVER]
 hostname = heimdallr.domain.tld                                             # ip address of the heimdallr portal web server (public address needed if it runs on public network)
@@ -57,11 +65,4 @@ list = {
     'test': '57a5d2a1e1f9ba3a512aea9a77b98d9ab4d3d3189cb3bf9b0081e0db0117f80b:738653896b574287ba55f5db17539502',
 }                                                                           # the usernames and passwords used to log in
                                                                             # please use provided password-hasher.py to hash your password (usage : python password-hasher.py <yourpassword>)
-```
-Optional : create systemd service
-```
-cp -r heimdallr-portal/heimdallr-portal.service /lib/systemd/system/
-systemctl daemon-reload
-systemctl enable heimdallr-portal.service 
-service heimdallr-portal start
 ```
