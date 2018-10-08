@@ -16,22 +16,21 @@ Use a login page to allow your ip address to connect to your infrastucture
 Install paramiko and config Python library
 ```
 pip install paramiko
-pip install config
+pip install configparser
 ```
 Clone repo
 ```
+mkdir /opt/heimdallr-portal
+cd /opt/heimdallr-portal/
 git clone
-cp -r heimdallr-portal/ /opt/
 ```
 Add execution rights
 ``` 
-chmod a+x /opt/heimdallr-portal/heimdallr-portal.py
+chmod +x /opt/heimdallr-portal/heimdallr-portal.py
 ```
 Configure settings
 ```
-mkdir /etc/heimdallr-portal/
-cp -r heimdallr-portal/etc/heimdallr-portal/ /etc/heimdallr-portal/
-vi /etc/heimdallr-portal/config.py
+vi /opt/heimdallr-portal/config.ini
 ```
 Optional : create systemd service
 ```
@@ -44,17 +43,15 @@ service heimdallr-portal start
 ### Configuration explanations
 ```
 [SERVER]
-hostname = heimdallr.domain.tld                                             # ip address of the heimdallr portal web server (public address needed if it runs on public network)
+url = heimdallr.domain.tld                                                  # ip address of the heimdallr portal web server (public address needed if it runs on public network)
 port = 9090                                                                 # port in which the heimdallr portal web server listens
 reply_port = 9090                                                           # port on which the reply will be done (usefull in case of reverse proxifying)
 ssl_key = /etc/letsencrypt/live/heimdallr.domain.tld/privkey.pem            # path to ssl key to provide client for server security (https)
 ssl_cert = /etc/letsencrypt/live/heimdallr.domain.tld/fullchain.pem         # path to ssl certificate
-
-[SECURITY]
 max_retry = 3                                                               # max attempts on wrong login or password
 
-[ROUTERS]
-list = ["10.0.0.254", "192.168.1.1", "123.123.123.123"]                     # list of mikrotik routers address ip which will be configured
+[ROUTER]
+list = 10.0.0.254,192.168.1.1,123.123.123.123                               # list of mikrotik routers address ip which will be configured
 ssh_port = 22                                                               # mikrotik router ssh port to connect
 ssh_key = /home/admin/.ssh/id_rsa                                           # path to the ssh key used to connect to router
 ssh_user = admin                                                            # mikrotik router user used to connect

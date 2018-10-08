@@ -1,21 +1,22 @@
 [SERVER]
-hostname = heimdallr.domain.tld
+url = heimdallr.domain.tld
 port = 9090
 reply_port = 9090
 ssl_key = /etc/letsencrypt/live/heimdallr.domain.tld/privkey.pem
 ssl_cert = /etc/letsencrypt/live/heimdallr.domain.tld/fullchain.pem
-
-[SECURITY]
 max_retry = 3
 
-[ROUTERS]
-list = ["10.0.0.254", "192.168.1.1", "123.123.123.123"]
+[RECAPTCHA]
+site_key = xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+[ROUTER]
+list = 10.0.0.254,192.168.1.1,123.123.123.123
 ssh_port = 22
 ssh_key = /home/admin/.ssh/id_rsa
 ssh_user = admin
 admin_email = me@domain.tld
 
-[USERS]
+[USER]
 list = {
     'test': '57a5d2a1e1f9ba3a512aea9a77b98d9ab4d3d3189cb3bf9b0081e0db0117f80b:738653896b574287ba55f5db17539502',
 }
