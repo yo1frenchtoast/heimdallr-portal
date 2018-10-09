@@ -10,12 +10,12 @@ import hashlib
 import logging
 import configparser
 
-###
-## HEIMDALLR : RouterOS whitelisting portal
-## - ytanguy, 2017-12-06
-##
-## inspired by https://github.com/nikosft/login-portal
-###
+'''
+HEIMDALLR : RouterOS whitelisting portal
+    - ytanguy, 2017-12-06
+
+inspired by https://github.com/nikosft/login-portal
+'''
 
 # import configuration
 config = configparser.ConfigParser()
@@ -28,6 +28,9 @@ server_ssl_key = config.get('SERVER', 'ssl_key')
 server_ssl_cert = config.get('SERVER', 'ssl_cert')
 server_max_retry = int(config.get('SERVER', 'max_retry'))
 
+recaptcha_enable = config.get('RECAPTCHA', 'enable')
+recaptcha_site_key = config.get('RECAPTCHA', 'site_key')
+
 router_list = config.get('ROUTER', 'list').split(',')
 router_ssh_port = int(config.get('ROUTER', 'ssh_port'))
 router_ssh_key = config.get('ROUTER', 'ssh_key')
@@ -36,12 +39,12 @@ router_admin_email = config.get('ROUTER', 'admin_email')
 
 user_list = ast.literal_eval(config.get('USER', 'list'))
 
-recaptcha_site_key = config.get('RECAPTCHA', 'site_key')
-
 # scoring for blacklisting
 scoring = {}
 
-# functions
+'''
+functions
+'''
 def check_password(stored_password, user_password):
     hashed_password, stored_salt = stored_password.split(':')
     return hashed_password == hashlib.sha256(stored_salt + user_password).hexdigest()
@@ -52,7 +55,7 @@ def set_firewall(address_list, remote_address):
     email = '/tool e-mail send to='+ router_admin_email +' subject="$[/system identity get name] heimdallr-portal.py : added '+ remote_address +' to '+ address_list +' address-list for 2 hours";'
     command = firewall + log + email
 
-    #default message is success
+    # default message is success
     message = "You are now authorized with address {}".format(remote_address)
 
     output = {}
@@ -75,48 +78,68 @@ def set_firewall(address_list, remote_address):
 http server used by the the login portal
 '''
 class CaptivePortal(BaseHTTPServer.BaseHTTPRequestHandler):
-    #this is the index of the login portal
-    #it simply redirects the user to the to login page
-    html_redirect = """
-    <html>
-    <head>
-        <meta http-equiv="refresh" content="0; url=https://%s:%s/login" />
-    </head>
-    <body>
-        <b>Redirecting to login page</b>
-    </body>
-    </html>
-    """%(server_url, server_reply_port)
-    #the login page
-    html_login = """
-    <html>
-    <head>
-        <style type="text/css">
-            .text-xs-center {
-                text-align: center;
-            }
-            .g-recaptcha {
-                display: inline-block;
-            }
-        </style>
-        <script src='https://www.google.com/recaptcha/api.js'></script>
-    </head>
-    <body>
+    recaptcha_template = ''
+    if recaptcha_enable:
+        recaptcha_template = """<div class="g-recaptcha" data-sitekey="%s"></div>"""%(recaptcha_site_key)
+
+    '''
+    this is the index of the login portal
+    it simply redirects the user to the to login page
+    '''
+    html_redirect = """<html>
+<head>
+    <meta http-equiv="refresh" content="0; url=https://%s:%s/login" />
+</head>
+<body>
+    <b>Redirecting to login page</b>
+</body>
+</html>""" % (server_url, server_reply_port)
+
+    '''
+    login page
+    '''
+    html_login = """<html>
+<head>
+    <style type="text/css">
+        body {
+            height: 100%%;
+            background-image: url('https://sealandandsky.files.wordpress.com/2013/09/4745.jpg');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;
+        }
+        .main {
+            height: 100%%;
+            width: 100%%;
+            display: table;
+        }
+        .text-xs-center {
+            display: table-cell;
+            height: 100%%;
+            vertical-align: middle;
+            text-align: center;
+        }
+        .g-recaptcha {
+            display: inline-block;
+        }
+    </style>
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+</head>
+<body>
+    <div class="main">
         <div class="text-xs-center">
             <b>LOGIN</b>
             <form method="POST" action="do_login">
                 username: <input type="text" name="username" required><br>
                 password: <input type="password" name="password" required><br>
-
-                <div class="g-recaptcha" data-sitekey="%s">
-                </div>
-
-            <input type="submit" value="Submit">
+                <!-- Recaptcha section -->
+                %s<br>
+                <input type="submit" value="Submit">
             </form>
         </div>
-    </body>
-    </html>
-    """%(recaptcha_site_key)
+    </div>
+</body>
+</html>""" % (recaptcha_template)
 
     '''
     if the user requests the login page show it, else
@@ -149,16 +172,16 @@ class CaptivePortal(BaseHTTPServer.BaseHTTPRequestHandler):
         password = form.getvalue("password")
         remote_address = self.client_address[0]
 
-        #dummy security check
+        # dummy security check
         if username in user_list and check_password(user_list[username], password):
-            #authorized user
+            # authorized user
             logging.info('New authorization from {} for user {}'.format(remote_address, username))
             message = set_firewall('allowed', remote_address)
             self.wfile.write(message)
         else:
             logging.warning('Wrong login or password from {} for user {}'.format(remote_address, username))
 
-            #increment counter until blacklist
+            # increment counter until blacklist
             if remote_address in scoring:
                 scoring[remote_address] += 1
             else:
@@ -174,8 +197,10 @@ class CaptivePortal(BaseHTTPServer.BaseHTTPRequestHandler):
             #show the login form
             self.wfile.write(self.html_login)
 
-    #the following function makes server produce no output
-    #comment it out if you want to print diagnostic messages
+    '''
+    the following function makes server produce no output
+    comment it out if you want to print diagnostic messages
+    '''
     #def log_message(self, format, *args):
     #    return
 

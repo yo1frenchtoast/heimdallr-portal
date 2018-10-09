@@ -7,6 +7,7 @@ ssl_cert = /etc/letsencrypt/live/heimdallr.domain.tld/fullchain.pem
 max_retry = 3
 
 [RECAPTCHA]
+enable = False
 site_key = xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 [ROUTER]
